@@ -1,0 +1,148 @@
+# EdgeDash configuration
+# Edit this file to match your profile. Never put secrets here.
+
+# The role title you are targeting (used for job search queries and scoring).
+target_role: "Data Analyst"
+
+# City or region for job searches. Use "Remote" to target remote-only roles.
+target_city: "Bengaluru"
+
+# Keywords appended to job search queries for more precise results.
+keywords:
+  - "SQL"
+  - "Python"
+  - "Power BI"
+  - "data pipeline"
+  - "ETL"
+
+# Your current skill set. The GapAnalyzer compares job requirements against this.
+my_skills:
+  - "Python"
+  - "SQL"
+  - "Excel"
+  - "Pandas"
+  - "Matplotlib"
+  - "Power BI"
+
+# Years of relevant experience (used as a scoring signal).
+experience_years: 3
+
+# Path to the SQLite database file, relative to the repo root.
+# In week 4 this moves to an environment variable pointing at hosted Postgres.
+db_path: "edgedash.db"
+
+# Jobs with a fit score below this threshold are stored but not surfaced
+# on the dashboard by default (0–100 scale).
+min_fit_score: 60
+
+# Which source adapters to run. Each name must match a @register-ed Source class.
+# To add a source, add its name here — no other file changes needed.
+sources:
+  - "arbeitnow"
+
+# Set to true to use MockFetcher instead of the live Fetcher (offline development).
+use_mock_fetcher: false
+
+# LLM provider: "gemini" (requires GEMINI_API_KEY in .env) or
+#               "ollama" (local, no key needed).
+llm_provider: "gemini"
+
+# Model name passed to the provider. Change without touching any code.
+# Gemini suggestions: "gemini-3.6-flash", "gemini-3.5-flash", "gemini-flash-lite-latest"
+# Ollama suggestions: "llama3", "mistral", "phi3"
+llm_model: "gemini-3.6-flash"
+
+# Maximum listings scored in a single cycle (steering rule 21).
+# Keeps costs and rate-limit exposure structurally bounded.
+score_batch_size: 25
+
+# How many hours must pass before a new fetch is triggered.
+fetch_interval_hours: 6
+
+# Hard time caps passed to each agent as an explicit stop condition (rule 29).
+max_score_seconds: 300      # 5 minutes
+max_analyse_seconds: 120    # 2 minutes
+
+# Hard paging and listing caps for the Fetcher stop condition.
+max_fetch_pages: 5
+max_fetch_listings: 200
+
+# Target seniority band: "junior" | "mid" | "senior" | "lead"
+target_seniority: "mid"
+
+# Component weights for scoring (normalized 0.0–1.0)
+score_weights:
+  skill_match: 0.45
+  seniority_fit: 0.25
+  location_fit: 0.15
+  recency: 0.15
+
+# Skill aliases for canonicalisation.
+# This map is YOURS to edit — adding, modifying, and refining entries is expected
+# as you see your own extracted data over time (steering rule 23).
+# Format: "raw or alternative name": "canonical name"
+skill_aliases:
+  # Containers & Orchestration
+  k8s: "kubernetes"
+
+  # JavaScript vs Node.js (strictly separate — they are distinct skills)
+  js: "javascript"
+  nodejs: "node"
+  node.js: "node"
+
+  # Databases
+  postgresql: "postgres"
+  psql: "postgres"
+
+  # Cloud Platforms
+  google cloud: "gcp"
+  google cloud platform: "gcp"
+  amazon web services: "aws"
+  microsoft azure: "azure"
+
+  # Machine Learning & AI
+  ml: "machine learning"
+  ai: "artificial intelligence"
+
+  # CI/CD & DevOps
+  cicd: "ci/cd"
+  ci cd: "ci/cd"
+  ci/cd: "ci/cd"
+
+  # Additional common data/software collisions
+  py: "python"
+  powerbi: "power bi"
+  power-bi: "power bi"
+  ms excel: "excel"
+  microsoft excel: "excel"
+
+
+
+# ---------------------------------------------------------------------------
+# Verification thresholds (rule 39)
+# Every threshold has a comment naming the failure it is designed to catch.
+# ---------------------------------------------------------------------------
+
+# Catches score inflation: all fit scores cluster in a narrow band, suggesting
+# the scorer is not discriminating between strong and weak matches.
+min_score_spread: 10
+
+# Catches a constant-output scorer: stdev near zero means every listing
+# received essentially the same score.
+min_score_stdev: 5
+
+# Catches a broken extractor: if most listings have zero required_skills,
+# the extraction step likely failed silently.
+max_empty_extraction_pct: 20
+
+# Catches a model that returned a full sentence as a single skill entry,
+# or an extraction gone haywire with hundreds of items.
+max_skills_per_listing: 30
+
+# Catches ranking a rumour: a gap computed from fewer than this many listings
+# has too little evidence to be acted on.
+min_gap_sample: 3
+
+# Catches running on stale data: if the newest listing is older than this,
+# the fetch likely failed in a previous cycle without being caught.
+max_data_age_days: 3

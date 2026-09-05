@@ -1,0 +1,17 @@
+[browser]
+gatherUsageStats = false
+serverAddress = "localhost"
+
+[server]
+headless = true
+runOnSave = true
+showErrorDetails = false
+fileWatcherType = "poll"
+
+[theme]
+base = "dark"
+primaryColor = "#5c85d6"
+backgroundColor = "#0e0e10"
+secondaryBackgroundColor = "#1a1a1e"
+textColor = "#e6e6e6"
+font = "sans serif"
