@@ -248,12 +248,19 @@ def _normalize_pg_url(conn_spec: str) -> str:
         u, _, pw = userinfo.partition(":")
     else:
         u, pw = userinfo, None
-    safe = ""
-    u_enc = _url_quote(u, safe=safe) if u else ""
+    # RFC 3986 unreserved characters MUST NOT be percent-encoded in userinfo.
+    # Preserving them is required for Supabase pooler-style usernames like
+    # "postgres.<project-ref>" — encoding the dot as %2E makes the pooler
+    # strip the suffix and treat the user as plain "postgres", causing
+    # password authentication failures against the pooler endpoint.
+    safe_unreserved = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+                      "abcdefghijklmnopqrstuvwxyz" \
+                      "0123456789-._~"
+    u_enc = _url_quote(u, safe=safe_unreserved) if u else ""
     if pw is None:
         userinfo_enc = u_enc
     else:
-        userinfo_enc = f"{u_enc}:{_url_quote(pw, safe=safe)}"
+        userinfo_enc = f"{u_enc}:{_url_quote(pw, safe=safe_unreserved)}"
     return f"{scheme}://{userinfo_enc}@{hostpart}"
 
 
